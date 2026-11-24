@@ -6,10 +6,10 @@
 #include <avr/interrupt.h>
 
 const byte firstPin = 2; // First PinChangeInterrupt on D-bus
-const byte secondPin =  3; // Last PinChangeInterrupt on D-bus
-const byte fourthPin = 4; // First PinChangeInterrupt on D-bus
-const byte lastPin =  5; // First PinChangeInterrupt on D-bus
-int buttonState[4]={HIGH,HIGH,HIGH,HIGH};
+const byte secondPin =  3; // second PinChangeInterrupt on D-bus
+const byte fourthPin = 4; // third PinChangeInterrupt on D-bus
+const byte lastPin =  5; // fourth PinChangeInterrupt on D-bus
+extern int buttonState[4]; // Declares an external array that stores the state of all four buttons.
 /* 
   initButtonsAndButtonInterrupts subroutine is called from Setup() function
   during the initialization of Speden Spelit. This function does the following:
@@ -28,7 +28,7 @@ void initButtonsAndButtonInterrupts(void);
 */
 void debounce(void);
 /*
-  Gives buttonsate 
+  returns the current state of button
 */
 int getButtonState(int buttonIndex);
 
