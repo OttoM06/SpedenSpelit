@@ -37,7 +37,7 @@ void setAllLeds(void);
 //   show1() subroutine shows numbers 0,1,...,15 as binary numbers
 //   waits a bit and repeats number "show"
 // */
-// void show1(void);
+void show1(void);
 
 /*
   show2(int) subroutine shows leds 0,1,2,3,0,1,2,3,.... with increasing
