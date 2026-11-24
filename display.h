@@ -2,6 +2,7 @@
 #define DISPLAY_H
 #include <arduino.h>
 
+#include "utils.h"
 
 /*
   initializeDisplay subroutine initializes 5 pins needed for controlling 7-segment
@@ -46,6 +47,32 @@ void writeByte(uint8_t number, bool last);
 */
 void writeHighAndLowNumber(uint8_t tens,uint8_t ones);
 
+/*
+  WriteCharByte subroutine writes a character to the 7-segment display.
+*/
+static void writeCharByte(byte pattern, bool last);
+
+/*
+  prints a character to the 7-segment display.
+  This function uses writeCharByte to write a character
+  to the display. If there are many 7-segment displays cascaded,
+  last parameter can be used similarly to the writeByte subroutine.
+  
+  Parameters:
+    char character: character to be printed. Accepts characters
+                    a,b,c,d,e,f,g,h and space.
+    
+    bool last: either true or false. True = number is displayed
+              at the output, false is used if this function is called
+              multiple times to write all cascaded numbers to 7-segment
+              displays.
+*/
+bool printChar(char character, bool last);
+
+/*
+  Prints a string to the 7-segment display using printChar.
+*/
+void printString(const char* str);
 
 /*
   showResuts(byte result) This function separates tens and ones

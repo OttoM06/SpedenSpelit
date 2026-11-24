@@ -20,6 +20,20 @@ byte displayNumbers[10] = { // A byte type array. Every binary number in it ligh
   B01101111 // 9
 };
 
+static const byte chars[][9] {
+//char a,b,c,d,e,f,g,dot
+  {'a',1,1,1,0,1,1,1,0}, {'b',0,0,1,1,1,1,1,0},
+  {'c',0,0,0,1,1,0,1,0}, {'d',0,1,1,1,1,0,1,0},
+  {'e',1,0,0,1,1,1,1,0}, {'f',1,0,0,0,1,1,1,0},
+  {'g',1,0,1,1,1,1,0,0}, {'h',0,1,1,0,1,1,1,0},
+  {'i',0,1,1,0,0,0,0,0}, {'j',0,1,1,1,1,0,0,0},
+  {'l',0,0,0,1,1,1,0,0}, {'n',0,0,1,0,1,0,1,0},
+  {'o',0,0,1,1,1,0,1,0}, {'p',1,1,0,0,1,1,1,0},
+  {'r',0,0,0,0,1,0,1,0}, {'s',1,0,1,1,0,1,1,0},
+  {'t',0,0,0,1,1,1,1,0}, {'u',0,0,1,1,1,0,0,0},
+  {'y',0,1,1,1,0,1,1,0},
+};
+
 void initializeDisplay(void) {
   // Set the states of Arduino digital pins 8-12 to output.
   for (int i = 8; i < 13; i++) {
@@ -55,6 +69,76 @@ void writeByte(uint8_t bits,bool last) {
 void writeHighAndLowNumber(uint8_t tens, uint8_t ones) {
   writeByte(tens, false);
   writeByte(ones, true);
+}
+
+static void writeCharByte(byte pattern, bool last) {
+  digitalWrite(oePin, LOW);
+  digitalWrite(resetPin, HIGH);
+  digitalWrite(latchPin, LOW);
+
+  for (int i = 7; i >= 0; i--) {
+    digitalWrite(clockPin, LOW);
+    digitalWrite(dataPin, (pattern >> i) & 1);
+    digitalWrite(clockPin, HIGH);
+  }
+
+  if (last) {
+    digitalWrite(latchPin, HIGH);
+  }
+}
+
+bool printChar(char character, bool last) {
+  if(character == ' ') {
+    writeCharByte(0, last);
+    return true;
+  }
+
+  for (int i = 0; i < sizeof(chars) / sizeof(chars[0]); i++) {
+    if (character != chars[i][0]) continue;
+
+    byte pattern = 0;
+
+    for (int bit = 0; bit < 8; bit++) {
+      pattern |= chars[i][bit + 1] << bit;
+    }
+
+    writeCharByte(pattern, last);
+    return true;
+  }
+
+  return false;
+}
+
+void printString(const char* str) {
+  static unsigned long timer = 0;
+  static unsigned int index = 0;
+  static const char* previousText = nullptr;
+  static bool scrolling = false;
+
+  if(previousText != str) {
+    previousText = str;
+    index = 0;
+    scrolling = strlen(str) > 2;
+    timer = millis();
+  }
+
+  if(scrolling && utils::wait(500, timer)) {
+    timer = millis();
+    index++;
+  }
+
+  if(index >= strlen(str) + 1) {
+    index = 0;
+  }
+
+  char first = ' ';
+  char second = ' ';
+
+  if(index < strlen(str)) first = str[index];
+  if(index + 1 < strlen(str)) second = str[index + 1];
+
+  printChar(first, false);
+  printChar(second, true);
 }
 
 void showResult(byte number) {

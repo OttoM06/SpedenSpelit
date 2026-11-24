@@ -5,9 +5,15 @@
 
 // meininki
 
+const unsigned long LED_BLANK_TIME = 100;
+
 volatile int buttonNumber = -1;           // for buttons interrupt handler
 volatile bool newTimerInterrupt = false;  // for timer interrupt handler
 volatile unsigned int isrCallIndex = 0;   // this index is raised every time the isr is called.
+
+static bool ledBlanking = false;
+static byte nextLed = 0;
+static unsigned long ledBlankTimer = 0;
 
 int numbers[100];                         // array for the numbers that are generated
 int score = 0;
@@ -53,10 +59,18 @@ void loop() {
     unsigned int callIndex = isrCallIndex;    // Copy to a variable to avoid reading a broken int if the isr modifies the value while it's being read
     interrupts();
 
-    setLed(numbers[(callIndex - 1) % 100]);   // isr increments isrCallIndex before this is called so the first number is 1.
+    nextLed = numbers[(callIndex - 1) % 100]; // isr increments isrCallIndex before this is called so the first number is 1.
                                               // Also % 100 to keep the idx between 0,..,99 even if the actual index is way above that
 
+    ledBlankTimer = millis();
+    ledBlanking = true;
+
     newTimerInterrupt = false;
+  }
+
+  if(ledBlanking && utils::wait(LED_BLANK_TIME, ledBlankTimer)) {
+    setLed(nextLed);
+    ledBlanking = false;
   }
 }
 
@@ -93,10 +107,10 @@ ISR(TIMER1_COMPA_vect) {
 
     newTimerInterrupt = true;
     
-    if(isrCallIndex % 10 == 0) {
+    if(isrCallIndex % 5 == 0) {
       // Increase speed
 
-      if(OCR1A > 3000) OCR1A -= 2000;   // Clamp the speed-up
+      if(OCR1A > 6000) OCR1A -= 1000;   // Clamp the speed-up
     }
   }
 }
@@ -168,6 +182,7 @@ void initializeGame() {
   for(int i = 0; i < 100; i++) {
     // Each index is a random number between 0 and 3 which 
     // correspoonds to the leds that are lit up. 0 = A2, 1 = A3, 2 = A4, 3 = A5
+
     numbers[i] = random(0, 4);
   }
 
@@ -210,6 +225,8 @@ void endTheGame(int scoreReached) {
 void idle() {
   static byte step = 0;
   static unsigned long timer = 0;
+
+  printString("speden spelit");
 
   if(step == 4) {
     if(show2(2)) {
