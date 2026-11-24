@@ -43,6 +43,19 @@ void setAllLeds() {         //Turns on all the leds
   digitalWrite(A5, HIGH);
 }
 
+//counts from 0 to 15 and shows them as their binary values
+void show1() {
+        const int pins[4] = {A2, A3, A4, A5};  //index 0 = least significant bit
+
+        for (int n = 0; n < 16; n++) {
+            for (int i = 0; i < 4; i++) {
+                digitalWrite(pins[i], (n >> i) & 1);
+            }
+            delay(500);
+            // numeb show
+        }
+    }
+
 //Turns on the leds in order for a set amount of loops
 // with the speed increasing at the end of each loop.
 bool show2(int rounds) {
